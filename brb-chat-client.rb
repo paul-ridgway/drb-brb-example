@@ -29,7 +29,7 @@ class ChatClient
 		while true
 			message = prompt("Message")
 			puts "You: #{message}"
-			core.send_message_block @client_id, @name, message
+			core.send_message_block @client_id, message
 		end
 	end 
 

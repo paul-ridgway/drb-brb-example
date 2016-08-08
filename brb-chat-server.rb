@@ -4,6 +4,31 @@ require 'brb'
 require 'pp'
 require 'securerandom'
 
+module Kernel
+  remove_method :exec
+  remove_method :system
+  remove_method :`
+end
+
+module BrB
+  module Tunnel
+    module Shared
+
+      def treat_request(obj)
+        puts "treat_request"
+        if obj.size == 2
+          new_brb_in_request(obj[1])
+        else
+          new_brb_in_request(obj[1], *(obj.last))
+        end
+        rescue => e
+          puts "Chaos: #{e}"
+      end
+
+    end
+  end
+end
+
 class ChatServer
 
   def initialize
@@ -12,8 +37,9 @@ class ChatServer
     @started = false
   end
   
-  def send_message(id, name, message)
-    puts "SERVER: We got a message from #{id} / #{@names[id]}: #{message}"
+  def send_message(id, message)
+    name = @names[id]
+    puts "SERVER: We got a message from #{id} / #{name}: #{message}"
     broadcast id, name, message
   end
 
@@ -34,6 +60,7 @@ class ChatServer
     
     Thread.abort_on_exception = true
     port = 5555
+    EM.error_handler { |e| puts "Error raised during event loop: #{e.message}" }
     BrB::Service.start_service(object: self, verbose: true, host: 'localhost', port: port) do |event, client|
       on_connection_event(event, client)
     end
