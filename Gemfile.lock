@@ -1,11 +1,15 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    brb (0.3.1)
+      eventmachine (> 0.12)
+    eventmachine (1.2.0.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  brb
 
 BUNDLED WITH
    1.10.6
