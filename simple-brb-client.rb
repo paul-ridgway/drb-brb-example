@@ -8,7 +8,7 @@ host = 'localhost'
 
 # Connecting to the core server, retrieving its interface object : core
 # We do not want to expose an object, so the first parameter is nil
-core = BrB::Tunnel.create(nil, "brb://#{host}:#{port}", :verbose => true)
+core = BrB::Tunnel.create(nil, "brb://#localhost:5555", :verbose => true)
 
 # # Calling 10 times an non blocking method on the distant core server
 # 10.times do
