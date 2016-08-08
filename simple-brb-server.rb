@@ -18,6 +18,13 @@ class ExposedCoreObject
     puts "#{Thread.current} > Done sleeping in long api method, return"
     return 'OK LONG'
   end
+
+  def add(a, b)
+    result = a + b
+    puts "[#{@name}] Adding: #{a} + #{b} = #{result}"
+    return result
+  end
+    
   
 end
 
