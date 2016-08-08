@@ -2,12 +2,14 @@
 
 require 'brb'
 require 'pp'
+require 'securerandom'
 
 class ChatServer
 
   def initialize
     @clients = {}
     @names = {}
+    @started = false
   end
   
   def send_message(id, name, message)
@@ -20,13 +22,23 @@ class ChatServer
     "There's no method called #{m} here -- please try again."  
   end
 
+  def ping
+    "pong @ #{Time.new}"
+  end
+
   def start
+    if @started
+      puts "Already started!"
+      return
+    end
+    
     Thread.abort_on_exception = true
     port = 5555
     BrB::Service.start_service(object: self, verbose: true, host: 'localhost', port: port) do |event, client|
       on_connection_event(event, client)
     end
     puts "Listening on port #{port}"
+    @started = true
     EM.reactor_thread.join
   end
 
@@ -46,16 +58,17 @@ class ChatServer
   end
 
   def register_client(client)
-    id = 'unknown_id'
-    name = 'unknown_name'
+    uid = SecureRandom.uuid
+    id = "unknown_id-#{uid}"
+    name = "unknown_name-#{uid}"
     id = client.client_id_block if client.method_missing(:send_block, :respond_to?, :client_id)
     name = client.name_block if client.method_missing(:send_block, :respond_to?, :name)
 
     @clients[client] = id
     @names[id] = name
 
-    broadcast id, "Server", "#{name} has joined the group"
     puts "Client #{id} registered. #{client_summary}"
+    broadcast id, "Server", "#{name} has joined the group"
   end
 
   def unregister_client(client)
@@ -63,8 +76,8 @@ class ChatServer
     name = @names[id]
     @clients.delete(client)
 
-    broadcast id, "Server", "#{name} has left the group"
     puts "Client #{id} unregistered. #{client_summary}"
+    broadcast id, "Server", "#{name} has left the group"
   end
 
   def client_summary
